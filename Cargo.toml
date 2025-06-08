@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: 2025 Sébastien Helleu <flashcode@flashtux.org>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "ironflood"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap = { version = "4.5.39", features = ["derive"] }
+eframe = "0.31.1"
+egui = "0.31.1"
+rand = "0.9.1"
