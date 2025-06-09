@@ -159,3 +159,90 @@ impl Playfield {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_new_game() {
+        let game = Game::new(20, 10, 6, true, 20);
+        assert_eq!(
+            game.playfield.squares[0],
+            game.playfield.squares[20 * 10 - 1]
+        );
+        assert_eq!(game.playfield.width, 20);
+        assert_eq!(game.playfield.height, 10);
+        assert_eq!(game.colors, 6);
+        assert_eq!(game.versus, true);
+        assert_eq!(game.square_size, 20.0);
+        assert_eq!(game.played, 0);
+        assert_ne!(game.score, [0, 0]);
+    }
+
+    #[test]
+    fn test_compute_scores() {
+        let mut game = Game {
+            playfield: Playfield {
+                // test squares: 3x3, ██ = blue, ░░ = red
+                //   ██ ██ ░░
+                //   ██ ░░ ░░
+                //   ░░ ░░ ░░
+                squares: vec![
+                    Color32::BLUE, // line 1
+                    Color32::BLUE,
+                    Color32::RED,
+                    Color32::BLUE, // line 2
+                    Color32::RED,
+                    Color32::RED,
+                    Color32::RED, // line 3
+                    Color32::RED,
+                    Color32::RED,
+                ],
+                width: 3,
+                height: 3,
+            },
+            colors: 2,
+            versus: true,
+            square_size: 20.0,
+            played: 0,
+            score: [0; 2],
+        };
+        game.compute_scores();
+        assert_eq!(game.score, [3, 6]);
+    }
+
+    #[test]
+    fn test_flood_best_color() {
+        let mut game = Game::new(4, 4, 6, true, 20);
+        game.playfield = Playfield {
+            // test squares: 4x4, ██ = blue, ░░ = red, ▚▚ = cyan, ▄▄ = green
+            //   ██ ██ ░░ ▚▚
+            //   ██ ██ ▚▚ ▚▚
+            //   ██ ▚▚ ░░ ░░
+            //   ▄▄ ▄▄ ░░ ░░
+            squares: vec![
+                Color32::BLUE, // line 1
+                Color32::BLUE,
+                Color32::RED,
+                Color32::CYAN,
+                Color32::BLUE, // line 2
+                Color32::BLUE,
+                Color32::CYAN,
+                Color32::CYAN,
+                Color32::BLUE, // line 3
+                Color32::CYAN,
+                Color32::RED,
+                Color32::RED,
+                Color32::GREEN, // line 4
+                Color32::GREEN,
+                Color32::RED,
+                Color32::RED,
+            ],
+            width: 4,
+            height: 4,
+        };
+        game.flood_best_color(3, 3);
+        assert_eq!(game.playfield.squares[4 * 4 - 1], Color32::CYAN);
+    }
+}
