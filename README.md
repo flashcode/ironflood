@@ -11,6 +11,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 **IronFlood** is a puzzle game inspired by Flood-it game.
 
+<img src="https://github.com/flashcode/ironflood/blob/main/ironflood.png" alt="IronFlood" />
+
 ## Copyright
 
 <!-- REUSE-IgnoreStart -->
