@@ -2,13 +2,18 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-
 use eframe::egui;
 use egui::{Color32, Pos2, Rect, ViewportCommand};
 
 use crate::game::Game;
 
-pub fn run_app(width: u16, height: u16, colors: u16, square_size: u16) -> eframe::Result {
+pub fn run_app(
+    width: u16,
+    height: u16,
+    colors: u16,
+    versus: bool,
+    square_size: u16,
+) -> eframe::Result {
     let viewport_size: [f32; 2] = [
         width as f32 * square_size as f32,
         height as f32 * square_size as f32,
@@ -18,7 +23,7 @@ pub fn run_app(width: u16, height: u16, colors: u16, square_size: u16) -> eframe
         ..Default::default()
     };
     let app = IronfloodApp {
-        game: Game::new(width, height, colors, square_size),
+        game: Game::new(width, height, colors, versus, square_size),
     };
     eframe::run_native("IronFlood", options, Box::new(|_cc| Ok(Box::new(app))))
 }
@@ -32,10 +37,7 @@ impl eframe::App for IronfloodApp {
         egui::CentralPanel::default().show(ctx, |ui| {
             self.mouse_events(ctx);
             self.draw_playfield(ui);
-            ctx.send_viewport_cmd(ViewportCommand::Title(format!(
-                "IronFlood ({})",
-                self.game.played
-            )));
+            self.set_title(ctx);
         });
     }
 }
@@ -47,12 +49,22 @@ impl IronfloodApp {
             if let Some(pos) = ctx.input(|i| i.pointer.latest_pos()) {
                 let x = (pos.x / self.game.square_size) as u16;
                 let y = (pos.y / self.game.square_size) as u16;
-                let color_top_left = self.game.get_square(0, 0);
-                let color = self.game.get_square(x, y);
-                if color != color_top_left {
-                    self.game.flood(0, 0, color_top_left);
-                    self.game.flood_end(color);
+                let color_top_left = self.game.playfield.squares[0];
+                let color_bottom_right = self.game.playfield.squares
+                    [(self.game.playfield.width * self.game.playfield.height - 1) as usize];
+                let color =
+                    self.game.playfield.squares[(y * self.game.playfield.width + x) as usize];
+                if color != color_top_left && (!self.game.versus || color != color_bottom_right) {
+                    self.game.playfield.flood(0, 0, color_top_left);
+                    self.game.playfield.flood_end(color);
                     self.game.played += 1;
+                    if self.game.versus {
+                        self.game.flood_best_color(
+                            self.game.playfield.width - 1,
+                            self.game.playfield.height - 1,
+                        );
+                        self.game.compute_scores();
+                    }
                 }
             }
         }
@@ -75,10 +87,27 @@ impl IronfloodApp {
 
     // Draw the playfield
     fn draw_playfield(&self, ui: &mut egui::Ui) {
-        for y in 0..self.game.height {
-            for x in 0..self.game.width {
-                self.draw_square(ui, x, y, self.game.get_square(x, y))
+        for y in 0..self.game.playfield.height {
+            for x in 0..self.game.playfield.width {
+                let color =
+                    self.game.playfield.squares[(y * self.game.playfield.width + x) as usize];
+                self.draw_square(ui, x, y, color);
             }
+        }
+    }
+
+    // Set the window title with game info
+    fn set_title(&self, ctx: &egui::Context) {
+        if self.game.versus {
+            ctx.send_viewport_cmd(ViewportCommand::Title(format!(
+                "IronFlood - Versus mode: {} - {}",
+                self.game.score[0], self.game.score[1],
+            )));
+        } else {
+            ctx.send_viewport_cmd(ViewportCommand::Title(format!(
+                "IronFlood - Single player: {}",
+                self.game.played,
+            )));
         }
     }
 }

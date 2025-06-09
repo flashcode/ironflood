@@ -25,6 +25,26 @@
         {
             "type": "lldb",
             "request": "launch",
+            "name": "Debug executable 'ironflood' in versus mode",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=ironflood",
+                    "--package=ironflood"
+                ],
+                "filter": {
+                    "name": "ironflood",
+                    "kind": "bin"
+                }
+            },
+            "args": [
+                "--versus"
+            ],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
             "name": "Debug unit tests in executable 'ironflood'",
             "cargo": {
                 "args": [

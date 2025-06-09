@@ -25,6 +25,10 @@ struct Args {
     #[arg(short, long, default_value_t = 6, value_parser = clap::value_parser!(u16).range(2..=12))]
     colors: u16,
 
+    /// Versus mode: play against computer
+    #[arg(short, long, default_value_t = false)]
+    versus: bool,
+
     /// Square size in pixels
     #[arg(short, long, default_value_t = 60, value_parser = clap::value_parser!(u16).range(3..))]
     square_size: u16,
@@ -32,5 +36,11 @@ struct Args {
 
 fn main() -> eframe::Result {
     let args = Args::parse();
-    run_app(args.width, args.height, args.colors, args.square_size)
+    run_app(
+        args.width,
+        args.height,
+        args.colors,
+        args.versus,
+        args.square_size,
+    )
 }
