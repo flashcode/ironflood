@@ -30,6 +30,13 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Check
+      # only on Windows
+      if: ${{ contains(matrix.os, 'windows') }}
+      run: cargo check
+
+    - name: Clippy
+      # all OS except Windows
+      if: ${{ ! contains(matrix.os, 'windows') }}
       run: cargo clippy -- -Dclippy::pedantic
 
     - name: Build
