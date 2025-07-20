@@ -9,7 +9,7 @@ use clap::Parser;
 
 use crate::app::run_app;
 
-/// IronFlood game
+/// `IronFlood` game
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {

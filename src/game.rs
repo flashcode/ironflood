@@ -28,7 +28,7 @@ pub struct Game {
     pub versus: bool,
     pub square_size: f32,
     pub played: u16,
-    pub score: [u16; 2],
+    pub score: [u64; 2],
 }
 
 #[derive(Clone)]
@@ -45,7 +45,7 @@ impl Game {
             playfield: Playfield::new(width, height, colors, versus),
             colors,
             versus,
-            square_size: square_size as f32,
+            square_size: f32::from(square_size),
             played: 0,
             score: [0, 0],
         };
@@ -56,7 +56,7 @@ impl Game {
     }
 
     // Compute score of the color at (x, y)
-    pub fn compute_score(&self, x: u16, y: u16) -> u16 {
+    pub fn compute_score(&self, x: u16, y: u16) -> u64 {
         let mut playfield = self.playfield.clone();
         let color = playfield.squares[(y * playfield.width + x) as usize];
         playfield.flood(x, y, color);
@@ -64,7 +64,7 @@ impl Game {
             .squares
             .iter()
             .filter(|&c| *c == COLOR_TEMP)
-            .count() as u16
+            .count() as u64
     }
 
     // Compute score of both players
@@ -76,7 +76,7 @@ impl Game {
     // Flood with the best color found at (x, y)
     pub fn flood_best_color(&mut self, x: u16, y: u16) {
         let mut best_color: Color32 = COLOR_TEMP;
-        let mut max_squares: u16 = 0;
+        let mut max_squares: u64 = 0;
         let color_xy = self.playfield.squares[(y * self.playfield.width + x) as usize];
         let color_top_left = self.playfield.squares[0];
         let color_bottom_right =
@@ -95,7 +95,7 @@ impl Game {
                 .squares
                 .iter()
                 .filter(|&c| *c == COLOR_TEMP)
-                .count() as u16;
+                .count() as u64;
             if count > max_squares {
                 best_color = *color;
                 max_squares = count;
@@ -134,16 +134,16 @@ impl Playfield {
     pub fn flood(&mut self, x: u16, y: u16, color: Color32) {
         self.squares[(y * self.width + x) as usize] = COLOR_TEMP;
         if y > 0 && self.squares[((y - 1) * self.width + x) as usize] == color {
-            self.flood(x, y - 1, color)
+            self.flood(x, y - 1, color);
         }
         if y < self.height - 1 && self.squares[((y + 1) * self.width + x) as usize] == color {
-            self.flood(x, y + 1, color)
+            self.flood(x, y + 1, color);
         }
         if x > 0 && self.squares[(y * self.width + x - 1) as usize] == color {
-            self.flood(x - 1, y, color)
+            self.flood(x - 1, y, color);
         }
         if x < self.width - 1 && self.squares[(y * self.width + x + 1) as usize] == color {
-            self.flood(x + 1, y, color)
+            self.flood(x + 1, y, color);
         }
     }
 
@@ -174,8 +174,8 @@ mod tests {
         assert_eq!(game.playfield.width, 20);
         assert_eq!(game.playfield.height, 10);
         assert_eq!(game.colors, 6);
-        assert_eq!(game.versus, true);
-        assert_eq!(game.square_size, 20.0);
+        assert!(game.versus);
+        assert!((game.square_size - 20.0).abs() < 0.001_f32);
         assert_eq!(game.played, 0);
         assert_ne!(game.score, [0, 0]);
     }

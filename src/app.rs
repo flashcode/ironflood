@@ -47,13 +47,15 @@ impl IronfloodApp {
     fn mouse_events(&mut self, ctx: &egui::Context) {
         if ctx.input(|i| i.pointer.primary_released()) {
             if let Some(pos) = ctx.input(|i| i.pointer.latest_pos()) {
-                let x = (pos.x / self.game.square_size) as u16;
-                let y = (pos.y / self.game.square_size) as u16;
+                let x = pos.x / self.game.square_size;
+                let y = pos.y / self.game.square_size;
                 let color_top_left = self.game.playfield.squares[0];
                 let color_bottom_right = self.game.playfield.squares
                     [(self.game.playfield.width * self.game.playfield.height - 1) as usize];
-                let color =
-                    self.game.playfield.squares[(y * self.game.playfield.width + x) as usize];
+                #[allow(clippy::cast_possible_truncation)]
+                #[allow(clippy::cast_sign_loss)]
+                let color = self.game.playfield.squares
+                    [y as usize * self.game.playfield.width as usize + x as usize];
                 if color != color_top_left && (!self.game.versus || color != color_bottom_right) {
                     self.game.playfield.flood(0, 0, color_top_left);
                     self.game.playfield.flood_end(color);
@@ -74,12 +76,12 @@ impl IronfloodApp {
     fn draw_square(&self, ui: &mut egui::Ui, x: u16, y: u16, color: Color32) {
         let rect = Rect {
             min: Pos2 {
-                x: x as f32 * self.game.square_size,
-                y: y as f32 * self.game.square_size,
+                x: f32::from(x) * self.game.square_size,
+                y: f32::from(y) * self.game.square_size,
             },
             max: Pos2 {
-                x: (x as f32 * self.game.square_size) + self.game.square_size - 1.0,
-                y: (y as f32 * self.game.square_size) + self.game.square_size - 1.0,
+                x: (f32::from(x) * self.game.square_size) + self.game.square_size - 1.0,
+                y: (f32::from(y) * self.game.square_size) + self.game.square_size - 1.0,
             },
         };
         ui.painter().rect_filled(rect, 0., color);
