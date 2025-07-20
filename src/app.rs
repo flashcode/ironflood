@@ -5,25 +5,25 @@
 use eframe::egui;
 use egui::{Color32, Pos2, Rect, ViewportCommand};
 
-use crate::game::Game;
+use crate::{Args, game::Game};
 
-pub fn run_app(
-    width: u16,
-    height: u16,
-    colors: u16,
-    versus: bool,
-    square_size: u16,
-) -> eframe::Result {
+pub fn run_app(args: &Args) -> eframe::Result {
     let viewport_size: [f32; 2] = [
-        width as f32 * square_size as f32,
-        height as f32 * square_size as f32,
+        f32::from(args.width) * f32::from(args.square_size),
+        f32::from(args.height) * f32::from(args.square_size),
     ];
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default().with_inner_size(viewport_size),
         ..Default::default()
     };
     let app = IronfloodApp {
-        game: Game::new(width, height, colors, versus, square_size),
+        game: Game::new(
+            args.width,
+            args.height,
+            args.colors,
+            args.versus,
+            args.square_size,
+        ),
     };
     eframe::run_native("IronFlood", options, Box::new(|_cc| Ok(Box::new(app))))
 }

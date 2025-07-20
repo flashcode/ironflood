@@ -36,11 +36,5 @@ struct Args {
 
 fn main() -> eframe::Result {
     let args = Args::parse();
-    run_app(
-        args.width,
-        args.height,
-        args.colors,
-        args.versus,
-        args.square_size,
-    )
+    run_app(&args)
 }
