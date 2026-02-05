@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 Sébastien Helleu <flashcode@flashtux.org>
+// SPDX-FileCopyrightText: 2025-2026 Sébastien Helleu <flashcode@flashtux.org>
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -45,28 +45,28 @@ impl eframe::App for IronfloodApp {
 impl IronfloodApp {
     // Handle mouse events
     fn mouse_events(&mut self, ctx: &egui::Context) {
-        if ctx.input(|i| i.pointer.primary_released()) {
-            if let Some(pos) = ctx.input(|i| i.pointer.latest_pos()) {
-                let x = pos.x / self.game.square_size;
-                let y = pos.y / self.game.square_size;
-                let color_top_left = self.game.playfield.squares[0];
-                let color_bottom_right = self.game.playfield.squares
-                    [(self.game.playfield.width * self.game.playfield.height - 1) as usize];
-                #[allow(clippy::cast_possible_truncation)]
-                #[allow(clippy::cast_sign_loss)]
-                let color = self.game.playfield.squares
-                    [y as usize * self.game.playfield.width as usize + x as usize];
-                if color != color_top_left && (!self.game.versus || color != color_bottom_right) {
-                    self.game.playfield.flood(0, 0, color_top_left);
-                    self.game.playfield.flood_end(color);
-                    self.game.played += 1;
-                    if self.game.versus {
-                        self.game.flood_best_color(
-                            self.game.playfield.width - 1,
-                            self.game.playfield.height - 1,
-                        );
-                        self.game.compute_scores();
-                    }
+        if ctx.input(|i| i.pointer.primary_released())
+            && let Some(pos) = ctx.input(|i| i.pointer.latest_pos())
+        {
+            let x = pos.x / self.game.square_size;
+            let y = pos.y / self.game.square_size;
+            let color_top_left = self.game.playfield.squares[0];
+            let color_bottom_right = self.game.playfield.squares
+                [(self.game.playfield.width * self.game.playfield.height - 1) as usize];
+            #[allow(clippy::cast_possible_truncation)]
+            #[allow(clippy::cast_sign_loss)]
+            let color = self.game.playfield.squares
+                [y as usize * self.game.playfield.width as usize + x as usize];
+            if color != color_top_left && (!self.game.versus || color != color_bottom_right) {
+                self.game.playfield.flood(0, 0, color_top_left);
+                self.game.playfield.flood_end(color);
+                self.game.played += 1;
+                if self.game.versus {
+                    self.game.flood_best_color(
+                        self.game.playfield.width - 1,
+                        self.game.playfield.height - 1,
+                    );
+                    self.game.compute_scores();
                 }
             }
         }
