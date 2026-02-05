@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Sébastien Helleu <flashcode@flashtux.org>
+# SPDX-FileCopyrightText: 2025-2026 Sébastien Helleu <flashcode@flashtux.org>
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -12,9 +12,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-
   build:
-
     strategy:
       matrix:
         os:
@@ -26,21 +24,13 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - uses: actions/checkout@v6
 
-    - uses: actions/checkout@v4
+      - name: Build
+        run: cargo build --verbose
 
-    - name: Check
-      # only on Windows
-      if: ${{ contains(matrix.os, 'windows') }}
-      run: cargo check
+      - name: Run tests
+        run: cargo test --verbose
 
-    - name: Clippy
-      # all OS except Windows
-      if: ${{ ! contains(matrix.os, 'windows') }}
-      run: cargo clippy -- -Dclippy::pedantic
-
-    - name: Build
-      run: cargo build --verbose
-
-    - name: Run tests
-      run: cargo test --verbose
+      - name: Run clippy
+        run: cargo clippy -- -D clippy::pedantic
